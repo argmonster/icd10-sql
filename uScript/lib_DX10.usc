@@ -10,6 +10,10 @@ library lib_DX10()
  %define row_color4 "bgcolor='LemonChiffon'" 
  %define col_color_multi "bgcolor='LightGrey'"
  %define CN_ICD10_DATE 10/01/2015
+
+ %define CN_icd9ansiQual "BK"
+ %define CN_icd10ansiQual "ABK"
+ 
  on load do: 
   %global o_user, o_pass, o_ds, o_db, ICD10_Table, ICD9_Table, dsn, ICD10_File, ICD9_FIle 
   o_user      is x
@@ -881,6 +885,86 @@ public dynamic function icd10recavail(cid) is x
   icd10recavail = "N"
  endif
 end icd10recavail
+
+public dynamic function getBillQualifier(asofdate) is x
+
+asofdate       is x
+
+if asofdate < CN_icd10_date then
+   getBillQualifier = CN_icd9ansiQual
+else 
+   getBillQualifier = CN_icd10ansiQual
+endif
+
+end getBillQualifier
+
+public dynamic function getBillingDx(client_id, servicetype, servicedate) is x
+
+client_id      is x
+servicetype    is x
+servicedate    is d
+
+dx10_code[]    is x
+dx9_code[]     is x
+dx_cat[]       is x
+
+dx-code[]      is x
+
+getClientDx(client_id, servicedate,,,,,, dx10_code[],,,dx9_code[],,dx_cat[])
+
+if servicedate < CN_icd10_date then
+   dx-code[] = dx9_code[]
+else 
+   dx-code[] dx10_code[]
+endif
+
+getBillingDx = getDxByCategory(servicetype, dx-code[], dx_cat[])
+end getBillingDx
+
+private dynamic function getDxByCategory(cat-type, dx-list[], dx-cat[]) is x
+
+cat-type    is x
+dx-list[]   is x
+dx-cat[]    is x
+
+cat-map[,]  is x
+cat-val[]   is x
+
+cat         is b
+cat-idx     is b
+dx-idx      is b
+
+dx-out      is x
+
+'define the map
+cat-map[1] = "MH"
+cat-map[2] = "SA"
+cat-map[3] = "IDD"
+cat-map[4] = "PH"
+
+cat-val[1,1] = "TP_"
+cat-val[1,2] = "PP"
+cat-val[1,3] = "IP"
+cat-val[2,1] = "SA"
+cat-val[3,1] = "ID"
+cat-val[4,1] = "PH"
+
+$clear(dx-out)
+
+cat = $find(cat-type, cat-map[], 1, "F")
+
+cat-idx = 0
+do while cat-idx++ < $maxarray(cat-val[cat])
+   dx-idx = $find(cat-val[cat, cat-idx], dx-cat[], 1, "P")
+   if dx-idx > 0 then
+      dx-out = dx-list[dx-idx]
+      cat-idx = $maxarray(cat-val[cat])
+   endif
+enddo
+
+getDxByCategory = dx-out
+
+end getDxByCategory
 
 public dynamic function GETDXFROM10(cid,icd_ver,rtdxtype) is x
  cid         is x
