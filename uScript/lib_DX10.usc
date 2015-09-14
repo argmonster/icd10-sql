@@ -915,7 +915,7 @@ getClientDx(client_id, servicedate,,,,,, dx10_code[],,,dx9_code[],,dx_cat[])
 if servicedate < CN_icd10_date then
    dx-code[] = dx9_code[]
 else 
-   dx-code[] dx10_code[]
+   dx-code[] = dx10_code[]
 endif
 
 getBillingDx = getDxByCategory(servicetype, dx-code[], dx_cat[])
@@ -927,8 +927,8 @@ cat-type    is x
 dx-list[]   is x
 dx-cat[]    is x
 
-cat-map[,]  is x
-cat-val[]   is x
+cat-map[]   is x
+cat-val[,]  is x
 
 cat         is b
 cat-idx     is b
