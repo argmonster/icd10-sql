@@ -1,0 +1,35 @@
+start lib-bill-qual-test()
+
+rc is b
+
+lib-dx is b
+
+rc = $loadlib(lib-dx, "lib_DX10")
+
+pre_icd10 is d
+
+pre_icd10 = "9/1/2014"
+
+post_icd10 is d
+
+post_icd10 = "10/1/2015"
+
+qualifier is x
+
+qualifier = lib-dx:getBillQualifier(pre_icd10)
+
+if qualifier != "BK" then
+   $errmsg1 = "Expecting ICD 9 Qualifier 'BK', but got " + qualifier
+else
+   $infomsg1 = "ICD 9 Qualifier Passed"
+endif
+
+qualifier = lib-dx:getBillQualifier(post_icd10)
+
+if qualifier !=  "ABK" then
+   $errmsg2 = "Expecting ICD 10 Qualifier 'ABK', but got " + qualifier
+else 
+   $infomsg2 = "ICD 10 Qualifier Passed"
+endif
+
+end lib-bill-qual-test
