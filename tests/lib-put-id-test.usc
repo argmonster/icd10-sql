@@ -1,0 +1,188 @@
+start lib-put-id-test()
+
+$trace("on,path", "/c1/FRSH/P/test.trace")
+
+client is x
+
+rc is b
+
+lib-dx is b
+
+rc = $loadlib(lib-dx, "lib_DX10")
+
+'add the dx variables
+clientid             is x
+effdate              is d
+recdate              is d
+c_dx10_dt            is x
+staffid              is x
+rectime              is t
+recentrydate         is d
+recentrytime         is t
+c_dx10_reason        is x
+c_dx10_stat          is x
+recexpdate           is d
+c_dx10_primary_a     is x
+c_dx10_uniq[]        is x
+10dotted             is x
+9dotted              is x
+c_dx10_a4_supgrp     is x
+c_dx10_a4_socenv     is x
+c_dx10_a4_edu        is x
+c_dx10_a4_occ        is x
+c_dx10_a4_housng     is x
+c_dx10_a4_eco        is x
+c_dx10_a4_health     is x
+c_dx10_a4_legal      is x
+c_dx10_a4_psyenv     is x
+c_dx10_a4_none       is x
+c_dx10_a5_gaf        is x
+c_dx10_curr_abl      is x
+c_dx10_pot_abl       is x
+c_dx10_iq_score      is x
+c_dx10_iq_date       is x
+c_dx10_iq_test       is x
+c_dx10_sq_score      is x
+c_dx10_sq_date       is x
+c_dx10_sq_test       is x
+c_dx10_comment       is x
+isConverted          is x
+
+'get dst vars
+
+dx_rec       is uid
+dx_date      is d
+dx_time      is t
+dx_primary   is x
+dx_reason    is x
+dx10_code[]  is x
+dx_rank[]    is x
+dx_axis[]    is x
+dx9_code[]   is x
+dx_batchdt   is d
+dx_cat[]     is x
+
+'add the test client
+c.ln is x
+c.fn is x
+c.type is x
+
+clientid = "DXTEST1"
+
+rc = $dbaddreg(2, clientid, c.ln, c.fn, c.type)
+$dblock()
+rc = $dbread(2, clientid, c.ln, c.fn, c.type)
+c.ln = "DX"
+c.fn = "TEST"
+c.type = "AC"
+rc = $dbupdate(2, clientid, c.ln, c.fn, c.type)
+
+$infomsg9 = $format(rc, "dbaddreg: 99, ")
+
+effdate = "9/1/2015"
+recdate = "9/2/2015"
+c_dx10_dt = "9/3/2015"
+staffid = "1869"
+rectime = "10:01"
+recentrydate = "9/4/2015"
+recentrytime = "10:02"
+c_dx10_reason = "2"
+c_dx10_stat = "C"
+recexpdate = "9/1/2016"
+c_dx10_primary_a = "1"
+10dotted  = "Y"
+9dotted = "Y"
+
+ c_dx10_uniq[1] = "004771" 'F20.0
+ c_dx10_uniq[2] = "004776" 'F20.81
+ c_dx10_uniq[3] = "004803" 'F31.10
+ c_dx10_uniq[4] = "004813" 'F31.60
+ c_dx10_uniq[5] = "004827" 'F31.81
+ c_dx10_uniq[6] = "004830" 'F32.0
+ c_dx10_uniq[7] = "005052" 'F70
+ c_dx10_uniq[8] = "005053" 'F71
+ c_dx10_uniq[9] = "005054" 'F72
+ c_dx10_uniq[10] = "005055" 'F73
+ c_dx10_uniq[11] = "003286" 'E08.331
+ c_dx10_uniq[12] = "003272" 'E08.311
+ c_dx10_uniq[13] = "003636" 'E13.41
+ c_dx10_uniq[14] = "003687" 'E13.65
+ c_dx10_uniq[15] = "003616" 'E13.349
+ c_dx10_uniq[16] = "003521" 'E13.359
+
+ rc = lib-dx:set_sql("CMHC_Write", "MXGuQ2tw", "dw", "WOOD_TEST")
+
+ rc = lib-dx:putClientDx(dx_rec, clientid,
+    effdate, staffid, recdate, rectime, recentrydate, recentrytime, recexpdate,
+    c_dx10_reason, c_dx10_stat, c_dx10_primary_a,
+    c_dx10_uniq[],
+    10dotted, 9dotted)
+
+ lib-dx:getClientDx(clientid, "9/10/2015", dx_rec, dx_date, dx_time, dx_primary, dx_reason, dx10_code[], dx_rank[], dx_axis[], dx9_code[], dx_batchdt,dx_cat[])
+
+
+if dx10_code[1] != "F20.0" then
+   $errmsg1 = $format(dx10_code[1], "Expected a dx code F20.0 but got ~~~~~~~~")
+else
+   $infomsg1 = "Dx code 1 passed"
+endif
+
+if dx10_code[2] != "F20.81" then
+   $errmsg2 = $format(dx10_code[2], "Expected a dx code F20.81 but got ~~~~~~~~")
+else
+   $infomsg2 = "Dx code 2 passed"
+endif
+if dx10_code[3] != "F31.10" then
+   $errmsg3 = $format(dx10_code[3], "Expected a dx code F31.10 but got ~~~~~~~~")
+else
+   $infomsg2 = "Dx code 3 passed"
+endif
+if dx10_code[4] != "F31.60" then
+   $errmsg4 = $format(dx10_code[4], "Expected a dx code F31.60 but got ~~~~~~~~")
+else
+   $infomsg4 = "Dx code 4 passed"
+endif
+if dx10_code[5] != "F31.81" then
+   $errmsg5 = $format(dx10_code[5], "Expected a dx code F31.81 but got ~~~~~~~~")
+else
+   $infomsg5 = "Dx code 5 passed"
+endif
+if dx10_code[6] != "F32.0" then
+   $errmsg6 = $format(dx10_code[6], "Expected a dx code F32.0 but got ~~~~~~~~")
+else
+   $infomsg6 = "Dx code 6 passed"
+endif
+if dx10_code[7] != "F70" then
+   $errmsg7 = $format(dx10_code[7], "Expected a dx code F70 but got ~~~~~~~~")
+else
+   $infomsg7 = "Dx code 7 passed"
+endif
+if dx10_code[8] != "F71" then
+   $errmsg8 = $format(dx10_code[8], "Expected a dx code F71 but got ~~~~~~~~")
+else
+   $infomsg8 = "Dx code 8 passed"
+endif
+if dx10_code[9] != "F72" then
+   $errmsg9 = $format(dx10_code[9], "Expected a dx code F72 but got ~~~~~~~~")
+else
+   $infomsg9 = "Dx code 9 passed"
+endif
+
+
+
+
+
+'clean up the reg
+c.dx10.rh is h
+c.dx10.dt is d
+$dblock()
+rc = $dbread(2, clientid, c.dx10.rh, c.dx10.dt)
+rc = $dbremovedst(2, clientid, c.dx10.rh, c.dx10.dt)
+$infomsg9 = $infomsg9 + $format(rc, "remove record: 99, ")
+
+rc = $dbremovereg(2, clientid)
+$infomsg9 = $infomsg9 + $format(rc, "remove reg: 99")
+
+$trace("off")
+
+end lib-put-id-test

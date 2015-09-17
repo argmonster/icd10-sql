@@ -1,0 +1,187 @@
+start lib-put-iqsq-test()
+
+client is x
+
+rc is b
+
+lib-dx is b
+
+rc = $loadlib(lib-dx, "lib_DX10")
+
+'add the dx variables
+clientid             is x
+effdate              is d
+recdate              is d
+c_dx10_dt            is x
+staffid              is x
+rectime              is t
+recentrydate         is d
+recentrytime         is t
+c_dx10_reason        is x
+c_dx10_stat          is x
+recexpdate           is d
+c_dx10_primary_a     is x
+c_dx10_uniq[]        is x
+10dotted             is x
+9dotted              is x
+c_dx10_a4_supgrp     is x
+c_dx10_a4_socenv     is x
+c_dx10_a4_edu        is x
+c_dx10_a4_occ        is x
+c_dx10_a4_housng     is x
+c_dx10_a4_eco        is x
+c_dx10_a4_health     is x
+c_dx10_a4_legal      is x
+c_dx10_a4_psyenv     is x
+c_dx10_a4_none       is x
+c_dx10_a5_gaf        is x
+c_dx10_curr_abl      is x
+c_dx10_pot_abl       is x
+c_dx10_iq_score      is x
+c_dx10_iq_date       is x
+c_dx10_iq_test       is x
+c_dx10_sq_score      is x
+c_dx10_sq_date       is x
+c_dx10_sq_test       is x
+c_dx10_comment       is x
+isConverted          is x
+
+'get dst vars
+
+dx_rec       is uid
+dx_date      is d
+dx_time      is t
+dx_primary   is x
+dx_reason    is x
+dx10_code[]  is x
+dx_rank[]    is x
+dx_axis[]    is x
+dx9_code[]   is x
+dx_batchdt   is d
+dx_cat[]     is x
+
+'add the test client
+c.ln is x
+c.fn is x
+c.type is x
+
+clientid = "DXTEST1"
+
+'set the test register
+rc = $dbaddreg(2, clientid, c.ln, c.fn, c.type)
+$dblock()
+rc = $dbread(2, clientid, c.ln, c.fn, c.type)
+c.ln = "DX"
+c.fn = "TEST"
+c.type = "AC"
+rc = $dbupdate(2, clientid, c.ln, c.fn, c.type)
+
+'set the test record
+effdate = "9/1/2015"
+recdate = "9/2/2015"
+c_dx10_dt = "9/3/2015"
+staffid = "1869"
+rectime = "10:01"
+recentrydate = "9/4/2015"
+recentrytime = "10:02"
+c_dx10_reason = "2"
+c_dx10_stat = "C"
+recexpdate = "9/1/2016"
+c_dx10_primary_a = "1"
+10dotted  = "Y"
+9dotted = "Y"
+c_dx10_a4_supgrp = "Y"
+c_dx10_a4_socenv = "Y"
+c_dx10_a4_edu    = "Y"
+c_dx10_a4_occ    = "Y"
+c_dx10_a4_housng = "Y"
+c_dx10_a4_eco    = "Y"
+c_dx10_a4_health = "Y"
+c_dx10_a4_legal  = "Y"
+c_dx10_a4_psyenv = "Y"
+c_dx10_a4_none   = ""
+c_dx10_a5_gaf    = "44"
+c_dx10_curr_abl  = "2"
+c_dx10_pot_abl   = "2"
+c_dx10_iq_score  = "22"
+c_dx10_iq_date   = "9/5/2015"
+c_dx10_iq_test   = "01"
+c_dx10_sq_score  = "33"
+c_dx10_sq_date   = "9/6/2015"
+c_dx10_sq_test   = "02"
+c_dx10_comment   = "Test the Comments"
+isConverted      = "N"
+
+ 'put record
+ rc = lib-dx:putClientDx(dx_rec, clientid,
+    effdate, staffid, recdate, rectime, recentrydate, recentrytime, recexpdate,
+    c_dx10_reason, c_dx10_stat, c_dx10_primary_a,
+    c_dx10_uniq[], c_dx10_comment,
+    10dotted, 9dotted,
+    c_dx10_a4_supgrp, c_dx10_a4_socenv, c_dx10_a4_edu, c_dx10_a4_occ, c_dx10_a4_housng, c_dx10_a4_eco, c_dx10_a4_health, c_dx10_a4_legal, c_dx10_a4_psyenv, c_dx10_a4_none, c_dx10_a5_gaf,
+    c_dx10_curr_abl, c_dx10_pot_abl,
+    c_dx10_iq_score, c_dx10_iq_date, c_dx10_iq_test, c_dx10_sq_score, c_dx10_sq_date, c_dx10_sq_test,
+    isConverted)
+
+ 'retrieve record
+ lib-dx:getClientDx(clientid, "9/10/2015", dx_rec, dx_date, dx_time, dx_primary, dx_reason, dx10_code[], dx_rank[], dx_axis[], dx9_code[], dx_batchdt,dx_cat[])
+
+iqscore is x
+iqtest is x
+iqdate is d
+
+sqscore is x
+sqtest is x
+sqdate is d
+
+ lib-dx:getclientIq(clientid, "9/10/2015", dx_rec, dx_date, 
+   iqscore, iqtest, iqdate, sqscore, sqtest, sqdate)
+
+if iqscore != "22" then
+   $errmsg1 = $format(iqscore, "Expected iq score of 22 but got ~~")
+else
+   $infomsg1 = "Dx iq score passed"
+endif
+
+if iqdate != "9/5/2015" then
+   $errmsg2 = $format(iqdate, "Expected iq date of 9/5/2015 but got MM/DD/YYYY")
+else
+   $infomsg2 = "Dx iq date passed"
+endif
+
+if iqtest != "01" then
+   $errmsg3 = $format(iqtest, "Expected iq test of 01 but got ~~")
+else
+   $infomsg3 = "dx iq test passed"
+endif
+
+if sqscore != "33" then
+   $errmsg4 = $format(sqscore, "Expected sq score of 33 but got ~~")
+else
+   $infomsg4 = "Dx sq score passed"
+endif
+
+if sqdate != "9/6/2015" then
+   $errmsg5 = $format(sqdate, "Expected sq date of 9/6/2015 but got MM/DD/YYYY")
+else
+   $infomsg5 = "Dx sq date passed"
+endif
+
+if sqtest != "02" then
+   $errmsg6 = $format(sqtest, "Expected sq test of 02 but got ~~")
+else
+   $infomsg6 = "dx sq test passed"
+endif
+
+
+
+
+'clean up the reg
+c.dx10.rh is h
+c.dx10.dt is d
+$dblock()
+rc = $dbread(2, clientid, c.dx10.rh, c.dx10.dt)
+rc = $dbremovedst(2, clientid, c.dx10.rh, c.dx10.dt)
+
+rc = $dbremovereg(2, clientid)
+end lib-put-iqsq-test

@@ -1,0 +1,53 @@
+start lib-bill-qual-test()
+
+client is x
+
+client = "000101" 'test client
+
+bill_code is x
+
+rc is b
+
+lib-dx is b
+
+rc = $loadlib(lib-dx, "lib_DX10")
+
+pre_icd10 is d
+
+pre_icd10 = "9/1/2014"
+
+post_icd10 is d
+
+post_icd10 = "10/1/2015"
+
+'icd 10 tests
+'mh
+bill_code = lib-dx:getBillingDx(client, "MH", pre_icd10)
+if bill_code != "F3177" then 
+   $errmsg1 = "Expected Billing Dx to be F3177, but got " + bill_code
+else
+   $infomsg1 = "icd10 mh bill code passed"
+endif
+
+billcode = lib-dx:getBillingDx(client, "SA", post_icd10)
+if bill_code != "F10229" then 
+   $errmsg2 = "Expected Billing Dx to be F10229, but got " + bill_code
+else
+   $infomsg2 = "icd10 sa bill code passed"
+endif
+
+billcode = lib-dx:getBillingDx(client, "IDD", post_icd10)
+if bill_code != "F70" then 
+   $errmsg3 = "Expected Billing Dx to be F70, but got " + bill_code
+else
+   $infomsg3 = "icd10 IDD bill code passed"
+endif
+
+billcode = lib-dx:getBillingDx(client, "PH", post_icd10)
+if bill_code != "E0800" then 
+   $errmsg4 = "Expected Billing Dx to be E0800, but got " + bill_code
+else
+   $infomsg4 = "icd10 IDD bill code passed"
+endif
+
+end lib-bill-qual-test

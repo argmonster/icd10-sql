@@ -27,6 +27,7 @@ library lib_DX10()
   dsn         is x
  %include inc_DX10
  
+
 dynamic function Set_Sql(user, pass, host, db, icd10, icd9, icd10file,icd9file) is null 
  user      is x
  pass      is x
@@ -41,6 +42,342 @@ dynamic function Set_Sql(user, pass, host, db, icd10, icd9, icd10file,icd9file) 
  o_pass      = pass
  o_ds        = host
  o_db        = db
+
+end Set_Sql
+
+public dynamic function putClientDx(dx_rec, clientid, 
+   effdate, staffid, recdate, rectime, recentrydate, recentrytime, recexpdate,
+   c_dx10_reason, c_dx10_stat, c_dx10_primary_a,
+   c_dx10_uniq[], c_dx10_comment,
+   10dotted, 9dotted,
+   c_dx10_a4_supgrp, c_dx10_a4_socenv, c_dx10_a4_edu, c_dx10_a4_occ, c_dx10_a4_housng, c_dx10_a4_eco, c_dx10_a4_health, c_dx10_a4_legal, c_dx10_a4_psyenv, c_dx10_a4_none, c_dx10_a5_gaf,
+   c_dx10_curr_abl, c_dx10_pot_abl,
+   c_dx10_iq_score, c_dx10_iq_date, c_dx10_iq_test, c_dx10_sq_score, c_dx10_sq_date, c_dx10_sq_test, 
+   isConverted) is b
+
+dx_rec               is uid
+clientid             is x
+effdate              is d
+recdate              is d
+staffid              is x
+rectime              is t
+recentrydate         is d
+recentrytime         is t
+c_dx10_reason        is x
+c_dx10_stat          is x
+recexpdate           is d
+c_dx10_primary_a     is x
+c_dx10_uniq[]        is x
+10dotted             is x
+9dotted              is x
+c_dx10_a4_supgrp     is x
+c_dx10_a4_socenv     is x
+c_dx10_a4_edu        is x
+c_dx10_a4_occ        is x
+c_dx10_a4_housng     is x
+c_dx10_a4_eco        is x
+c_dx10_a4_health     is x
+c_dx10_a4_legal      is x
+c_dx10_a4_psyenv     is x
+c_dx10_a4_none       is x
+c_dx10_a5_gaf        is x
+c_dx10_curr_abl      is x
+c_dx10_pot_abl       is x
+c_dx10_iq_score      is x
+c_dx10_iq_date       is x
+c_dx10_iq_test       is x
+c_dx10_sq_score      is x
+c_dx10_sq_date       is x
+c_dx10_sq_test       is x
+c_dx10_comment       is x
+isConverted          is x
+
+bad_char[]           is x
+bad_char_index       is b
+index                is b
+
+ $allowupdate(dx_rec)
+
+ bad_char[1] = "<"
+ bad_char[2] = ">"
+ bad_char[3] = "&"
+
+ if isConverted !dp then
+    isConverted = "N"
+ endif
+
+ if c_dx10_comment dp
+  bad_char_index = 0
+  do while bad_char_index++ < $maxarray(bad_char[])
+   c_dx10_comment = $replace(bad_char[bad_char_index],"_",c_dx10_comment)
+  enddo
+ endif
+
+ clearDsts()
+
+ c.dx10.rh[effd]  = effdate
+ dx_rec           = c.dx10.rh[uid] 
+ c.dx10.staff     = staffid
+ c.dx10.dt        = recdate
+ c.dx10.time      = rectime
+ c.dx10.entdt     = recentrydate
+ c.dx10.enttm     = recentrytime
+ c.dx10.reason    = c_dx10_reason
+ c.dx10.stat      = c_dx10_stat
+ c.dx10.expire    = recexpdate
+ c.dx10.pimary.ax = c_dx10_primary_a
+ c.dx10.a4.supgrp = c_dx10_a4_supgrp
+ c.dx10.a4.socenv = c_dx10_a4_socenv
+ c.dx10.a4.edu    = c_dx10_a4_edu  
+ c.dx10.a4.occ    = c_dx10_a4_occ    
+ c.dx10.a4.housng = c_dx10_a4_housng 
+ c.dx10.a4.eco    = c_dx10_a4_eco    
+ c.dx10.a4.health = c_dx10_a4_health 
+ c.dx10.a4.legal  = c_dx10_a4_legal  
+ c.dx10.a4.psyenv = c_dx10_a4_psyenv 
+ c.dx10.a4.none   = c_dx10_a4_none   
+ c.dx10.a5.gaf    = c_dx10_a5_gaf    
+ c.dx10.curr.abl  = c_dx10_curr_abl  
+ c.dx10.pot.abl   = c_dx10_pot_abl    
+ c.dx10.iq.score  = c_dx10_iq_score
+ c.dx10.iq.date   = c_dx10_iq_date
+ c.dx10.iq.test   = c_dx10_iq_test
+ c.dx10.sq.score  = c_dx10_sq_score
+ c.dx10.sq.date   = c_dx10_sq_date
+ c.dx10.sq.test   = c_dx10_sq_test
+ c.dx10.comment   = c_dx10_comment  
+ c.dx10.converted = isConverted
+
+ index = 0
+ do while index++ < $maxarray(c_dx10_uniq[])
+    putCodeByRank(c_dx10_uniq[index], index, 10Dotted, 9Dotted)
+ enddo
+
+ $dblock()
+ putClientDx =  $dbpoint(2, clientid, c.dx10.rh)
+ putClientDx =  $dbadddst(2, clientid, dx10_dstlist)
+
+end putClientDx
+
+private dynamic function clearDsts() is void
+$clear(c.dx10.rh,c.dx10.staff,c.dx10.entstaff,c.dx10.dt,c.dx10.time,c.dx10.entdt,c.dx10.enttm,c.dx10.caredt,c.dx10.reason,c.dx10.expire,c.dx10.pimary.ax,
+c.dx10.icd10.1,c.dx10.icd9.1,c.dx10.legax.1,c.dx10.dxcat.1,c.dx10.dxrank.1,c.dx10.uniq.1,c.dx10.icd10.2,c.dx10.icd9.2,c.dx10.legax.2,c.dx10.dxcat.2,c.dx10.dxrank.2,c.dx10.uniq.2,
+c.dx10.icd10.3,c.dx10.icd9.3,c.dx10.legax.3,c.dx10.dxcat.3,c.dx10.dxrank.3,c.dx10.uniq.3,c.dx10.icd10.4,c.dx10.icd9.4,c.dx10.legax.4,c.dx10.dxcat.4,c.dx10.dxrank.4,c.dx10.uniq.4,
+c.dx10.icd10.5,c.dx10.icd9.5,c.dx10.legax.5,c.dx10.dxcat.5,c.dx10.dxrank.5,c.dx10.uniq.5,c.dx10.icd10.6,c.dx10.icd9.6,c.dx10.legax.6,c.dx10.dxcat.6,c.dx10.dxrank.6,c.dx10.uniq.6,
+c.dx10.icd10.7,c.dx10.icd9.7,c.dx10.legax.7,c.dx10.dxcat.7,c.dx10.dxrank.7,c.dx10.uniq.7,c.dx10.icd10.8,c.dx10.icd9.8,c.dx10.legax.8,c.dx10.dxcat.8,c.dx10.dxrank.8,c.dx10.uniq.8,
+c.dx10.icd10.9,c.dx10.icd9.9,c.dx10.legax.9,c.dx10.dxcat.9,c.dx10.dxrank.9,c.dx10.uniq.9,c.dx10.icd10.10,c.dx10.icd9.10,c.dx10.legax.10,c.dx10.dxcat.10,c.dx10.dxrank.10,c.dx10.uniq.10,
+c.dx10.icd10.11,c.dx10.icd9.11,c.dx10.legax.11,c.dx10.dxcat.11,c.dx10.dxrank.11,c.dx10.uniq.11,c.dx10.icd10.12,c.dx10.icd9.12,c.dx10.legax.12,c.dx10.dxcat.12,c.dx10.dxrank.12,c.dx10.uniq.12,
+c.dx10.icd10.13,c.dx10.icd9.13,c.dx10.legax.13,c.dx10.dxcat.13,c.dx10.dxrank.13,c.dx10.uniq.13,c.dx10.icd10.14,c.dx10.icd9.14,c.dx10.legax.14,c.dx10.dxcat.14,c.dx10.dxrank.14,c.dx10.uniq.14,
+c.dx10.icd10.15,c.dx10.icd9.15,c.dx10.legax.15,c.dx10.dxcat.15,c.dx10.dxrank.15,c.dx10.uniq.15,c.dx10.icd10.16,c.dx10.icd9.16,c.dx10.legax.16,c.dx10.dxcat.16,c.dx10.dxrank.16,c.dx10.uniq.16,
+c.dx10.a4.supgrp,c.dx10.a4.socenv,c.dx10.a4.edu,c.dx10.a4.occ,c.dx10.a4.housng,c.dx10.a4.eco,c.dx10.a4.health,c.dx10.a4.legal,c.dx10.a4.psyenv,c.dx10.a4.none,c.dx10.a5.gaf,c.dx10.curr.abl,c.dx10.pot.abl,
+c.dx10.comment,c.dx10.snapid,c.dx10.isn,c.dx10.stat, c.dx10.converted,
+c.dx10.iq.score, c.dx10.iq.date, c.dx10.iq.test,
+c.dx10.sq.score, c.dx10.sq.date, c.dx10.sq.test)
+end clearDsts
+
+private dynamic function putCodeByRank (codeid, Rank, 10dotted, 9dotted) is void
+   codeid            is x
+   rank              is b
+   10dotted          is x
+   9dotted           is x
+
+   save_selected     is x
+   uniqid            is x
+   icd_code          is x
+   icd_code_dotnt    is x
+   icd_description   is x
+   icd_code2         is x
+   icd_code_dotnt2   is x
+   icd_Description2  is x
+   dsm_4_axis        is x
+   dx_cat            is x
+
+   save_code1        is x
+   save_code2        is x
+
+   if codeid !dp then
+      return
+   endif
+
+   save_selected = DX_Uniq_Query(codeid)
+   (void)$parsem(save_selected,1,"|",UniqID,ICD_Code,ICD_Code_DotNt,ICD_Description,
+      ICD_Code2,ICD_Code_DotNt2,ICD_Description2,DSM_4_Axis,,,,,,DX_Cat)
+
+   if 10dotted = "Y" then
+      save_code1 = ICD_Code_DotNt
+   else
+      save_code1 = ICD_code
+   endif
+   if 9Dotted = "Y" then
+      save_code2 = ICD_code_Dotnt2
+   else
+      save_code2 = ICD_code2
+   endif
+   select rank
+      case 1 gosub _RANK1
+      case 2 gosub _RANK2
+      case 3 gosub _RANK3
+      case 4 gosub _RANK4
+      case 5 gosub _RANK5
+      case 6 gosub _RANK6
+      case 7 gosub _RANK7
+      case 8 gosub _RANK8
+      case 9 gosub _RANK9
+      case 10 gosub _RANK10
+      case 11 gosub _RANK11
+      case 12 gosub _RANK12
+      case 13 gosub _RANK13
+      case 14 gosub _RANK14
+      case 15 gosub _RANK15
+      case 16 gosub _RANK16
+   endselect
+   'exit before the subs
+   return
+
+   'update the globals
+   _RANK1:
+    c.dx10.icd10.1 = save_code1
+    c.dx10.icd9.1  = ICD_Code2
+    c.dx10.legax.1  = DSM_4_Axis
+    c.dx10.dxcat.1  = DX_Cat
+    c.dx10.dxrank.1 = rank
+    c.dx10.uniq.1   = UniqID
+   goback
+   _RANK2:
+    c.dx10.icd10.2 = save_code1
+    c.dx10.icd9.2  = save_code2
+    c.dx10.legax.2  = DSM_4_Axis
+    c.dx10.dxcat.2  = DX_Cat
+    c.dx10.dxrank.2 = rank
+    c.dx10.uniq.2   = UniqID
+   goback
+   _RANK3:
+    c.dx10.icd10.3 = save_code1
+    c.dx10.icd9.3  = save_code2
+    c.dx10.legax.3  = DSM_4_Axis
+    c.dx10.dxcat.3  = DX_Cat
+    c.dx10.dxrank.3 = rank
+    c.dx10.uniq.3   = UniqID
+   goback
+   _RANK4:
+    c.dx10.icd10.4 = save_code1
+    c.dx10.icd9.4  = save_code2
+    c.dx10.legax.4  = DSM_4_Axis
+    c.dx10.dxcat.4  = DX_Cat
+    c.dx10.dxrank.4 = rank
+    c.dx10.uniq.4   = UniqID
+   goback
+   _RANK5:
+    c.dx10.icd10.5 = save_code1
+    c.dx10.icd9.5  = save_code2
+    c.dx10.legax.5  = DSM_4_Axis
+    c.dx10.dxcat.5  = DX_Cat
+    c.dx10.dxrank.5 = rank
+    c.dx10.uniq.5   = UniqID
+   goback
+   _RANK6:
+    c.dx10.icd10.6 = save_code1
+    c.dx10.icd9.6  = save_code2
+    c.dx10.legax.6  = DSM_4_Axis
+    c.dx10.dxcat.6  = DX_Cat
+    c.dx10.dxrank.6 = rank
+    c.dx10.uniq.6   = UniqID
+   goback
+   _RANK7:
+    c.dx10.icd10.7 = save_code1
+    c.dx10.icd9.7  = save_code2
+    c.dx10.legax.7  = DSM_4_Axis
+    c.dx10.dxcat.7  = DX_Cat
+    c.dx10.dxrank.7 = rank
+    c.dx10.uniq.7   = UniqID
+   goback
+   _RANK8:
+    c.dx10.icd10.8 = save_code1
+    c.dx10.icd9.8  = save_code2
+    c.dx10.legax.8  = DSM_4_Axis
+    c.dx10.dxcat.8  = DX_Cat
+    c.dx10.dxrank.8 = rank
+    c.dx10.uniq.8   = UniqID
+   goback
+   _RANK9:
+    c.dx10.icd10.9 = save_code1
+    c.dx10.icd9.9  = save_code2
+    c.dx10.legax.9  = DSM_4_Axis
+    c.dx10.dxcat.9  = DX_Cat
+    c.dx10.dxrank.9 = rank
+    c.dx10.uniq.9   = UniqID
+   goback
+   _RANK10:
+    c.dx10.icd10.10 = save_code1
+    c.dx10.icd9.10  = save_code2
+    c.dx10.legax.10  = DSM_4_Axis
+    c.dx10.dxcat.10  = DX_Cat
+    c.dx10.dxrank.10 = rank
+    c.dx10.uniq.10   = UniqID
+   goback
+   _RANK11:
+    c.dx10.icd10.11 = save_code1
+    c.dx10.icd9.11  = save_code2
+    c.dx10.legax.11  = DSM_4_Axis
+    c.dx10.dxcat.11  = DX_Cat
+    c.dx10.dxrank.11 = rank
+    c.dx10.uniq.11   = UniqID
+   goback
+   _RANK12:
+    c.dx10.icd10.12 = save_code1
+    c.dx10.icd9.12  = save_code2
+    c.dx10.legax.12  = DSM_4_Axis
+    c.dx10.dxcat.12  = DX_Cat
+    c.dx10.dxrank.12 = rank
+    c.dx10.uniq.12   = UniqID
+   goback
+   _RANK13:
+    c.dx10.icd10.13 = save_code1
+    c.dx10.icd9.13  = save_code2
+    c.dx10.legax.13  = DSM_4_Axis
+    c.dx10.dxcat.13  = DX_Cat
+    c.dx10.dxrank.13 = rank
+    c.dx10.uniq.13   = UniqID
+   goback
+   _RANK14:
+    c.dx10.icd10.14 = save_code1
+    c.dx10.icd9.14  = save_code2
+    c.dx10.legax.14  = DSM_4_Axis
+    c.dx10.dxcat.14  = DX_Cat
+    c.dx10.dxrank.14 = rank
+    c.dx10.uniq.14   = UniqID
+   goback
+   _RANK15:
+    c.dx10.icd10.15 = save_code1
+    c.dx10.icd9.15  = save_code2
+    c.dx10.legax.15  = DSM_4_Axis
+    c.dx10.dxcat.15  = DX_Cat
+    c.dx10.dxrank.15 = rank
+    c.dx10.uniq.15   = UniqID
+   goback
+   _RANK16:
+    c.dx10.icd10.16 = save_code1
+    c.dx10.icd9.16  = save_code2
+    c.dx10.legax.16  = DSM_4_Axis
+    c.dx10.dxcat.16  = DX_Cat
+    c.dx10.dxrank.16 = rank
+    c.dx10.uniq.16   = UniqID
+   goback
+end putCodeByRank
+
+dynamic function Set_Sql(user, pass, host, db, icd10, icd9) is null 
+ user  is x
+ pass  is x
+ host  is x
+ db    is x
+ icd10 is x
+ icd9  is x
+ if icd10 !dp then icd10 = "[t_ICD-10_ICD-10_with_GEM_AXIS]" endif
+ if icd9 !dp then icd9 = "[t_ICD-10_ICD-9_with_GEM_AXIS]" endif
+ o_user = user
+ o_pass = pass
+ o_ds = host
+ o_db = db
  ICD10_TABLE = icd10
  ICD9_TABLE  = icd9
  ICD10_File  = icd10file
@@ -331,7 +668,7 @@ function getclientdx(client_id, as_of_date, dx_rec, dx_date, dx_time, dx_primary
  $dbunlock()
 end getclientdx
 
-function getUnbatchCltDx(client_id, as_of_date, dx_rec, dx_date, dx_time, dx_primary, dx_reason, 
+public dynamic function getUnbatchCltDx(client_id, as_of_date, dx_rec, dx_date, dx_time, dx_primary, dx_reason, 
    dx10_code[], dx_rank[], dx_axis[], dx9_code[], dx_batchdt,dx_cat[],DX10_axis1[],DX9_axis1[],DX10_axis2[],DX9_axis2[],DX10_axis3[],DX9_axis3[],
    DX_uniqid[],dx_converted) is i
  client_id    is x
@@ -952,6 +1289,11 @@ cat-val[4,1] = "PH"
 $clear(dx-out)
 
 cat = $find(cat-type, cat-map[], 1, "F")
+
+if cat = 0 then
+   getDxByCategory = "Invalid Category"
+   return
+endif
 
 cat-idx = 0
 do while cat-idx++ < $maxarray(cat-val[cat])
