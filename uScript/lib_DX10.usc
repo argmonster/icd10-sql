@@ -38,10 +38,18 @@ dynamic function Set_Sql(user, pass, host, db, icd10, icd9, icd10file,icd9file) 
  icd10file is x
  icd9file  is x
 
+ if icd10 !dp then icd10 = "[t_ICD-10_ICD-10_with_GEM_AXIS]" endif
+ if icd9 !dp then icd9 = "[t_ICD-10_ICD-9_with_GEM_AXIS]" endif
+ 
  o_user      = user
  o_pass      = pass
  o_ds        = host
  o_db        = db
+ ICD10_TABLE = icd10
+ ICD9_TABLE = icd9
+ ICD10_FILE = icd10file
+ ICD9_FILE = icd9file
+ dsn = o_user + ":" + o_pass + ":" + o_ds + ":" + o_db
 
 end Set_Sql
 
@@ -365,26 +373,6 @@ private dynamic function putCodeByRank (codeid, Rank, 10dotted, 9dotted) is void
    goback
 end putCodeByRank
 
-dynamic function Set_Sql(user, pass, host, db, icd10, icd9) is null 
- user  is x
- pass  is x
- host  is x
- db    is x
- icd10 is x
- icd9  is x
- if icd10 !dp then icd10 = "[t_ICD-10_ICD-10_with_GEM_AXIS]" endif
- if icd9 !dp then icd9 = "[t_ICD-10_ICD-9_with_GEM_AXIS]" endif
- o_user = user
- o_pass = pass
- o_ds = host
- o_db = db
- ICD10_TABLE = icd10
- ICD9_TABLE  = icd9
- ICD10_File  = icd10file
- ICD9_File   = icd9file
- dsn = o_user + ":" + o_pass + ":" + o_ds + ":" + o_db
-end set_sql 
- 
 dynamic function DX_Lookup(selection[],10DOTTED,9DOTTED) is null
  10DOTTED         is x
  9DOTTED          is x
