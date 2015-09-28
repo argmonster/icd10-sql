@@ -9,7 +9,7 @@ library lib_DX10()
  %define row_color3 "bgcolor='PaleGreen'"
  %define row_color4 "bgcolor='LemonChiffon'" 
  %define col_color_multi "bgcolor='LightGrey'"
- %define CN_ICD10_DATE 10/01/2015
+ %define CN_ICD10_DATE 10/1/2015
 
  %define CN_icd9ansiQual "BK"
  %define CN_icd10ansiQual "ABK"
@@ -1292,7 +1292,7 @@ do while cat-idx++ < $maxarray(cat-val[cat])
    endif
 enddo
 
-getDxByCategory = dx-out
+getDxByCategory = $replace(".", "", dx-out)
 
 end getDxByCategory
 

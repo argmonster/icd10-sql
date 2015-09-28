@@ -1,0 +1,53 @@
+
+ start get-bill-test()
+
+ client_id     is x
+ servicetype   is x
+ servicedate   is d
+
+ dx-lib        is b
+ sql-lib       is b
+
+ rc            is b
+
+ log           is x
+ bill is x
+
+ cids[]  is x
+ i       is b
+
+ rc = $loadlib(dx-lib, "lib_DX10")
+ rc = $loadlib(sql-lib, "LIB-freetds")
+
+ sql-lib:useDSN("dw_read")
+
+ sql-lib:q("select clientid from client.events where eventdate > '9/1/2015' group by clientid", cids[])
+
+
+ e.client      is x
+ e.date        is d
+ e.ru          is b
+
+i = 0
+do while i++ < $maxarray(cids[])
+ client_id = $replace("|", "", cids[i])
+
+ rc = $startevents(,client_id, $today)
+
+ rc = $readnextevent(e.client, e.date, e.ru)
+ do while rc = 0
+   if e.ru != 9999 then
+      servicetype = $rt(e.ru,"RU2DXTYP","R")
+      bill = dx-lib:getBillingDx(client_id, servicetype, e.date)
+      log = $format(client_id, e.date, e.ru, bill, "~~~~~~|DDMMYYYY|9999|~~~~~~~~")
+      $log(log, "/c1/FRSH/P/bill.log")
+   endif
+   rc = $readnextevent(e.client, e.date, e.ru)
+   if e.date < 9/1/2015
+      rc = 99
+   endif
+ enddo
+enddo
+
+end get-bill-test
+
